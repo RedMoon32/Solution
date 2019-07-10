@@ -1,0 +1,3 @@
+Django
+requests_html
+psycopg2
