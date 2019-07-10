@@ -1,6 +1,6 @@
-#### Solution  
+## Solution  
 
-Instruction:
+### Instruction:
 1) clone repo
 2) run database:  `docker-compose up -d`
 3) create venv: `virtualenv venv`
@@ -12,3 +12,6 @@ Instruction:
  **or** parse data(may take too long): `python manage.py parse`
 7) Create user to access web-site: `python manage.py createsuperuser`
 8) Run server :`python manage.py runserver 8000`, and go to `http://127.0.0.1:8000/admin/` in browser to see data
+
+### Code base
+Main files are in verif_parser folder:` models.py, main_parser.py, tests.py, management/commands/parser.py`
