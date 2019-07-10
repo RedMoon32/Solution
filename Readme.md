@@ -2,7 +2,7 @@
 
 Instruction:
 1) clone repo
-2) run database:  `docker-compose up`
+2) run database:  `docker-compose up -d`
 3) create venv: `virtualenv venv`
 4) activate venv: `source venv/bin/activate`
 5) install requirements: `pip install -r requirements.txt`
