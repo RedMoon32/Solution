@@ -19,7 +19,10 @@ class Command(BaseCommand):
         last = 0
         prs = []
         for i in range(1, number_of_processes + 1):
-            p = Process(target=parse_all, args=(data[last:dcount // number_of_processes * i], i))
+            p = Process(
+                target=parse_all,
+                args=(data[last : dcount // number_of_processes * i], i),
+            )
             last = dcount // number_of_processes * i
             p.start()
             prs.append(p)

@@ -5,26 +5,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('verif_parser', '0003_remove_company_siren'),
-    ]
+    dependencies = [("verif_parser", "0003_remove_company_siren")]
 
     operations = [
-        migrations.RemoveField(
-            model_name='company',
-            name='code',
-        ),
-        migrations.RemoveField(
-            model_name='company',
-            name='created',
-        ),
-        migrations.RemoveField(
-            model_name='company',
-            name='siret',
-        ),
+        migrations.RemoveField(model_name="company", name="code"),
+        migrations.RemoveField(model_name="company", name="created"),
+        migrations.RemoveField(model_name="company", name="siret"),
         migrations.AddField(
-            model_name='company',
-            name='siren',
+            model_name="company",
+            name="siren",
             field=models.IntegerField(default=3),
             preserve_default=False,
         ),

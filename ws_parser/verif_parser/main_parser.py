@@ -45,7 +45,7 @@ def parse_all(sirens, nworker=1):
 
 
 def parse_company(page, siren) -> Company:
-    print('Parsing {siren} ...')
+    print("Parsing {siren} ...")
     """Parse company page"""
     try:
         company_name = page.html.find(COMPANY_NAME_SELECTOR)[0].text.lower()
@@ -56,7 +56,9 @@ def parse_company(page, siren) -> Company:
         company_address2 = page.html.find(COMPANY_ADDRESS_SELECTOR2)[0].text.lower()
 
         cur = Company.objects.get_or_create(
-            name=company_name, address=company_address1 + " " + company_address2, siren=siren
+            name=company_name,
+            address=company_address1 + " " + company_address2,
+            siren=siren,
         )[0]
         company_officers = page.html.xpath(COMPANY_OFFICERS_SELECTOR)
         if len(company_officers) > 0:
@@ -80,15 +82,15 @@ def parse_director(page) -> Director:
         date_of_birth = page.html.xpath(MAN_DATE_OF_BIRTH_SELECTOR)[0].lower()
         cur = Director.objects.filter(name=name, date_of_birth=date_of_birth)
         dot = [i for i in range(len(date_of_birth)) if date_of_birth[i] == "."][0]
-        date_of_birth = date_of_birth[len(name) + len(" est né le  "): dot]
+        date_of_birth = date_of_birth[len(name) + len(" est né le  ") : dot]
         if cur.exists():
             return cur
         cur = Director.objects.get_or_create(name=name, date_of_birth=date_of_birth)[0]
         html_comps = page.html.xpath(MAN_COMPANIES_SELECTOR1)[0]
         for company_url in html_comps.absolute_links:
             if COMPANY_URL in company_url:
-                dot = [i for i in range(len(company_url)) if company_url[i] == '-'][-1]
-                siren = int(company_url[dot + 1:-1])
+                dot = [i for i in range(len(company_url)) if company_url[i] == "-"][-1]
+                siren = int(company_url[dot + 1 : -1])
                 comp = Company.objects.filter(siren=siren)
                 if not comp.exists():
                     page = session.get(company_url)

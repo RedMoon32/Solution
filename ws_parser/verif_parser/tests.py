@@ -28,4 +28,4 @@ class TestParser(TestCase):
 
     def test_parse2(self):
         r = session.get("https://www.verif.com/societe/L-OISEAU-BLEU-5620190/")
-        parse_company(r,5620190 )
+        parse_company(r, 5620190)

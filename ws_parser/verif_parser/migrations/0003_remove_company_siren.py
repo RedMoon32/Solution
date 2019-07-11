@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('verif_parser', '0002_company_siren'),
-    ]
+    dependencies = [("verif_parser", "0002_company_siren")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='company',
-            name='siren',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="company", name="siren")]

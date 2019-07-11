@@ -1,5 +1,11 @@
 ## Solution  
 
+### Description
+Parsing *verif.com* and *dirigeants.bfmtv.comusing* in 4 parallel processes(with`multiprocessing` library) and using `requests-html` library and `Django` framework  
+for accessing data.
+
+
+
 ### Instruction:
 1) clone repo
 2) run database:  `docker-compose up -d`
