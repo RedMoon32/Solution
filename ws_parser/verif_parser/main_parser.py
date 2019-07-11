@@ -46,7 +46,7 @@ def parse_all(sirens, nworker=1):
 
 def parse_company(page, siren) -> Company:
     cur = None
-    print("Parsing {siren} ...")
+    print(f"Parsing {siren} ...")
     """Parse company page"""
     try:
         company_name = page.html.find(COMPANY_NAME_SELECTOR)[0].text.lower()
@@ -85,7 +85,7 @@ def parse_director(page) -> Director:
         dot = [i for i in range(len(date_of_birth)) if date_of_birth[i] == "."][0]
         date_of_birth = date_of_birth[len(name) + len(" est né le  ") : dot]
         if cur.exists():
-            return cur
+            return cur[0]
         cur = Director.objects.get_or_create(name=name, date_of_birth=date_of_birth)[0]
         html_comps = page.html.xpath(MAN_COMPANIES_SELECTOR1)[0]
         for company_url in html_comps.absolute_links:
