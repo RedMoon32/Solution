@@ -21,3 +21,8 @@ for accessing data.
 
 ### Code base
 Main files are in verif_parser folder:` models.py, main_parser.py, tests.py, management/commands/parser.py`
+
+## Images:
+![1](/1.jpg "1")
+![2](/2.jpg "2")
+![3](/3.jpg "3")
