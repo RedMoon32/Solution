@@ -45,6 +45,7 @@ def parse_all(sirens, nworker=1):
 
 
 def parse_company(page, siren) -> Company:
+    cur = None
     print("Parsing {siren} ...")
     """Parse company page"""
     try:
@@ -70,13 +71,13 @@ def parse_company(page, siren) -> Company:
             if director is not None:
                 cur.directors.add(director)
         cur.save()
-        return cur
     except Exception as e:
-        return None
-
+        pass
+    return cur
 
 def parse_director(page) -> Director:
     """Parse Director page"""
+    cur = None
     try:
         name = page.html.xpath(MAN_NAME_SELECTOR)[0].text.lower()
         date_of_birth = page.html.xpath(MAN_DATE_OF_BIRTH_SELECTOR)[0].lower()
@@ -99,6 +100,6 @@ def parse_director(page) -> Director:
                     comp = comp[0]
                 cur.companies.add(comp)
         cur.save()
-        return cur
     except Exception as e:
-        return None
+        pass
+    return cur

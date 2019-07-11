@@ -25,3 +25,9 @@ class TestParser(TestCase):
             "4 avril 1981",
         )
         self.assertEqual(Company.objects.get(name="entre 2&4").siren, 814577516)
+
+    def test_parse2(self):
+        data = session.get("https://www.verif.com/societe/JANOYER-THIERRY-325175/")
+        comp = parse_company(data, 0)
+        self.assertEqual(comp.name, 'janoyer thierry')
+        self.assertEqual(comp.directors.count(), 1)
