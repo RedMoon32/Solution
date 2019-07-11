@@ -25,7 +25,3 @@ class TestParser(TestCase):
             "4 avril 1981",
         )
         self.assertEqual(Company.objects.get(name="entre 2&4").siren, 814577516)
-
-    def test_parse2(self):
-        r = session.get("https://www.verif.com/societe/L-OISEAU-BLEU-5620190/")
-        parse_company(r, 5620190)
