@@ -1,14 +1,14 @@
 from django.test import TestCase
 
 # Create your tests here.
-from verif_parser.main_parser import session, parse_company
+from verif_parser.main_parser import session, CompanyParser
 from verif_parser.models import Director, Company
 
 
 class TestParser(TestCase):
     def test_parse1(self):
         data = session.get("https://www.verif.com/societe/ACME-807755319/")
-        comp = parse_company(data, 807755319)
+        comp = CompanyParser(data, 807755319).parse()
         self.assertEqual(comp.name, "acme")
         self.assertEqual(comp.address, "75010 paris 10")
         self.assertEqual(comp.directors.count(), 2)
@@ -28,6 +28,6 @@ class TestParser(TestCase):
 
     def test_parse2(self):
         data = session.get("https://www.verif.com/societe/JANOYER-THIERRY-325175/")
-        comp = parse_company(data, 0)
+        comp =CompanyParser(data, 0).parse()
         self.assertEqual(comp.name, 'janoyer thierry')
         self.assertEqual(comp.directors.count(), 1)

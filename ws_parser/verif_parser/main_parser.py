@@ -35,7 +35,7 @@ def parse_all(sirens, nworker=1):
     """Parse all companies"""
     for siren in sirens:
         page = session.get(find_company_url.format(siren))
-        res = parse_company(page, siren)
+        res = CompanyParser(page, siren).parse()
         if res is not None:
             print(f"{nworker} : + Company {siren} parsed successfully - {str(res)}")
         else:
@@ -44,62 +44,96 @@ def parse_all(sirens, nworker=1):
             )
 
 
-def parse_company(page, siren) -> Company:
-    cur = None
-    print(f"Parsing {siren} ...")
-    """Parse company page"""
-    try:
-        company_name = page.html.find(COMPANY_NAME_SELECTOR)[0].text.lower()
-        cur = Company.objects.filter(name=company_name)
-        if cur.exists():
-            return cur[0]
-        company_address1 = page.html.find(COMPANY_ADDRESS_SELECTOR1)[0].text.lower()
-        company_address2 = page.html.find(COMPANY_ADDRESS_SELECTOR2)[0].text.lower()
+class DirectorParser:
 
-        cur = Company.objects.get_or_create(
-            name=company_name,
-            address=company_address1 + " " + company_address2,
-            siren=siren,
-        )[0]
-        company_officers = page.html.xpath(COMPANY_OFFICERS_SELECTOR)
+    def __init__(self, page):
+        self.page = page
+
+    def get_name(self):
+        return self.page.html.xpath(MAN_NAME_SELECTOR)[0].text.lower()
+
+    def get_date_of_birth(self):
+        date_of_birth = self.page.html.xpath(MAN_DATE_OF_BIRTH_SELECTOR)[0].lower()
+        name = self.get_name()
+        dot = [i for i in range(len(date_of_birth)) if date_of_birth[i] == "."][0]
+        date_of_birth = date_of_birth[len(name) + len(" est né le  "): dot]
+        return date_of_birth
+
+    def get_companies(self):
+        html_comps = self.page.html.xpath(MAN_COMPANIES_SELECTOR1)[0]
+        companies = []
+        for company_url in html_comps.absolute_links:
+            if COMPANY_URL in company_url:
+                dot = [i for i in range(len(company_url)) if company_url[i] == "-"][-1]
+                siren = int(company_url[dot + 1: -1])
+                comp = Company.objects.filter(siren=siren)
+                if not comp.exists():
+                    page = session.get(company_url)
+                    comp = CompanyParser(page, siren).parse()
+                else:
+                    comp = comp[0]
+                if comp is not None:
+                    companies.append(comp)
+        return companies
+
+    def parse(self):
+        cur = None
+        try:
+            name = self.get_name()
+            date_of_birth = self.get_date_of_birth()
+            cur, created = Director.objects.get_or_create(name=name, date_of_birth=date_of_birth)
+            if not created:
+                return cur
+            companies = self.get_companies()
+            [cur.companies.add(company) for company in companies]
+            cur.save()
+        except Exception as e:
+            pass
+        return cur
+
+
+class CompanyParser:
+
+    def __init__(self, page, siren):
+        self.page = page
+        self.siren = siren
+
+    def get_name(self):
+        return self.page.html.find(COMPANY_NAME_SELECTOR)[0].text.lower()
+
+    def get_company_address(self):
+        company_address1 = self.page.html.find(COMPANY_ADDRESS_SELECTOR1)[0].text.lower()
+        company_address2 = self.page.html.find(COMPANY_ADDRESS_SELECTOR2)[0].text.lower()
+        return company_address1 + " " + company_address2
+
+    def get_directors(self):
+        company_officers = self.page.html.xpath(COMPANY_OFFICERS_SELECTOR)
+        directors = []
         if len(company_officers) > 0:
             # parse directors only where there is link to his information
             company_officers = company_officers[0].absolute_links
         for worker_url in company_officers:
             page = session.get(worker_url)
-            director = parse_director(page)
+            director = DirectorParser(page).parse()
             if director is not None:
-                cur.directors.add(director)
-        cur.save()
-    except Exception as e:
-        pass
-    return cur
+                directors.append(director)
+        return directors
 
-def parse_director(page) -> Director:
-    """Parse Director page"""
-    cur = None
-    try:
-        name = page.html.xpath(MAN_NAME_SELECTOR)[0].text.lower()
-        date_of_birth = page.html.xpath(MAN_DATE_OF_BIRTH_SELECTOR)[0].lower()
-        cur = Director.objects.filter(name=name, date_of_birth=date_of_birth)
-        dot = [i for i in range(len(date_of_birth)) if date_of_birth[i] == "."][0]
-        date_of_birth = date_of_birth[len(name) + len(" est né le  ") : dot]
-        if cur.exists():
-            return cur[0]
-        cur = Director.objects.get_or_create(name=name, date_of_birth=date_of_birth)[0]
-        html_comps = page.html.xpath(MAN_COMPANIES_SELECTOR1)[0]
-        for company_url in html_comps.absolute_links:
-            if COMPANY_URL in company_url:
-                dot = [i for i in range(len(company_url)) if company_url[i] == "-"][-1]
-                siren = int(company_url[dot + 1 : -1])
-                comp = Company.objects.filter(siren=siren)
-                if not comp.exists():
-                    page = session.get(company_url)
-                    comp = parse_company(page, siren)
-                else:
-                    comp = comp[0]
-                cur.companies.add(comp)
-        cur.save()
-    except Exception as e:
-        pass
-    return cur
+    def parse(self):
+        cur = None
+        try:
+            company_name = self.get_name()
+            company_address = self.get_company_address()
+            cur, created = Company.objects.get_or_create(
+                name=company_name,
+                address=company_address,
+                siren=self.siren,
+            )
+            if not created:  # company
+                return cur
+            directors = self.get_directors()
+            [cur.directors.add(director) for director in directors]
+            cur.save()
+        except Exception as e:
+            pass
+        return cur
